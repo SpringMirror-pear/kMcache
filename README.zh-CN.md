@@ -1,25 +1,25 @@
 # kmcache
 
-English | [简体中文](./README.zh-CN.md)
+[English](./README.md) | 简体中文
 
-`kmcache` is an async caching toolkit built for FastAPI-oriented services. It provides a composable L1/L2 cache architecture, production-focused cache protection features, and framework integration helpers so you can add caching without rewriting the same coordination logic in every project.
+`kmcache` 是一个面向 FastAPI 服务场景的异步缓存工具库，目标是在保持接入简单的同时，提供足够生产可用的缓存编排能力。它内置 L1/L2 分层缓存、热点保护、失效广播、预热、观测钩子和框架集成辅助，避免你在每个项目里重复实现同类逻辑。
 
-## Highlights
+## 核心能力
 
-- Async-first cache manager API
-- L1 local cache, L2 Redis cache, and L1+L2 layered cache
-- `single-flight` hot-key deduplication
-- Distributed lock protection for multi-instance cache breakdown
-- TTL jitter, null caching, and `stale-while-revalidate`
-- Redis-based invalidation broadcast
-- Batch operations and prefix invalidation
-- Warmup, circuit breaker, health snapshot, and observability hooks
-- FastAPI lifespan integration, decorators, and key builder helpers
-- Optional MessagePack and compressed serialization
+- 异步优先的缓存管理接口
+- `L1` 本地缓存、`L2` Redis 缓存、以及 `L1 + L2` 两级缓存
+- `single-flight` 热点 Key 去重
+- 多实例场景下的分布式锁防击穿
+- TTL 抖动、空值缓存、`stale-while-revalidate`
+- 基于 Redis 的失效广播
+- 批量读写与前缀失效
+- 预热、熔断、健康快照、可观测性钩子
+- FastAPI 生命周期集成、装饰器与 Key Builder 辅助
+- 可选 MessagePack 与压缩序列化
 
-## Installation
+## 安装
 
-`kmcache` keeps the core dependency set minimal. Install only what you need:
+`kmcache` 的核心依赖保持最小化，按需安装即可：
 
 ```bash
 python -m pip install kmcache
@@ -29,23 +29,23 @@ python -m pip install "kmcache[msgpack]"
 python -m pip install "kmcache[all]"
 ```
 
-If you want to run this repository locally:
+如果你想直接运行当前仓库：
 
 ```bash
 python -m pip install -r requirements.txt
 ```
 
-## Compatibility
+## 兼容性
 
 - Python: `3.11+`
-- Redis client: `redis.asyncio` via `redis==7.4.0`
-- FastAPI integration: `fastapi==0.136.1`
+- Redis 客户端: `redis.asyncio`，当前依赖 `redis==7.4.0`
+- FastAPI 集成: `fastapi==0.136.1`
 
-See [docs/compatibility.md](./docs/compatibility.md) for the current support matrix.
+当前支持矩阵见 [docs/compatibility.md](./docs/compatibility.md)。
 
-## Quick Start
+## 快速开始
 
-### L1 only
+### 仅使用 L1
 
 ```python
 from kmcache.backends.local import LocalCacheBackend
@@ -58,7 +58,7 @@ cache = CacheManager(
 )
 ```
 
-### L1 + L2
+### 使用 L1 + L2
 
 ```python
 from kmcache.backends.local import LocalCacheBackend
@@ -102,7 +102,7 @@ user = await cache.get_or_load(
 )
 ```
 
-### Batch operations
+### 批量接口
 
 ```python
 await cache.set_many(
@@ -118,9 +118,9 @@ await cache.delete_many(["user:1", "user:2"])
 await cache.delete_prefix("user:")
 ```
 
-## FastAPI Integration
+## FastAPI 集成
 
-Minimal example:
+最小示例：
 
 ```python
 from fastapi import Depends, FastAPI
@@ -147,7 +147,7 @@ async def get_user(user_id: int, dependency_cache: CacheManager = Depends(get_ca
     )
 ```
 
-Helpers included:
+当前提供的辅助能力：
 
 - `create_cache_lifespan`
 - `get_cache`
@@ -156,11 +156,11 @@ Helpers included:
 - `prefix_key_builder`
 - `build_cache_config_from_settings`
 
-See [examples/fastapi_minimal.py](./examples/fastapi_minimal.py) for a runnable example.
+可运行示例见 [examples/fastapi_minimal.py](./examples/fastapi_minimal.py)。
 
-## Public API
+## 公共 API
 
-Stable top-level exports currently include:
+当前稳定的顶层导出包括：
 
 - `CacheManager`
 - `CacheConfig`
@@ -173,42 +173,42 @@ Stable top-level exports currently include:
 - `get_cache`
 - `prefix_key_builder`
 
-## Observability
+## 可观测性
 
-Built-in hooks currently support:
+当前内置钩子支持：
 
-- Hit and miss counters
-- Loader start, error, and outcome metrics
-- Stale return and background refresh metrics
-- Lock wait and fallback metrics
-- Broadcast and circuit-open metrics
-- In-memory event hooks for local debugging and tests
+- 命中与未命中计数
+- loader 开始、失败、结果统计
+- stale 返回与后台刷新统计
+- 锁等待与 fallback 统计
+- 广播与熔断统计
+- 用于本地调试和测试的内存事件钩子
 
-Related modules:
+相关模块：
 
 - [kmcache/observability/metrics.py](./kmcache/observability/metrics.py)
 - [kmcache/observability/events.py](./kmcache/observability/events.py)
 
-## Quality
+## 质量检查
 
-Run the full local verification workflow:
+运行完整本地校验流程：
 
 ```bash
 python scripts/check.py
 ```
 
-This currently covers:
+当前流程包含：
 
 - `compileall`
-- full `unittest`
-- wheel smoke test
-- dependency presence checks
+- 全量 `unittest`
+- wheel 构建 smoke test
+- 依赖存在性检查
 
-CI is defined in [\.github/workflows/ci.yml](./.github/workflows/ci.yml).
+CI 配置见 [\.github/workflows/ci.yml](./.github/workflows/ci.yml)。
 
-## Documentation
+## 文档
 
-- [README.zh-CN.md](./README.zh-CN.md)
+- [README.md](./README.md)
 - [CHANGELOG.md](./CHANGELOG.md)
 - [CHANGELOG.zh-CN.md](./CHANGELOG.zh-CN.md)
 - [docs/compatibility.md](./docs/compatibility.md)
@@ -217,17 +217,17 @@ CI is defined in [\.github/workflows/ci.yml](./.github/workflows/ci.yml).
 - [docs/开发约束.md](./docs/开发约束.md)
 - [docs/任务规划.md](./docs/任务规划.md)
 
-## Status
+## 当前状态
 
-Current strengths:
+当前优势：
 
-- production-oriented cache coordination for FastAPI services
-- layered cache support with L1/L2 orchestration
-- solid unit and integration test baseline
-- packaging, changelog, and CI foundations for open-source usage
+- 面向 FastAPI 服务的生产级缓存编排能力
+- 清晰的 L1/L2 分层缓存路径
+- 较完整的单测与集成测试基线
+- 已具备开源仓库所需的打包、变更记录与 CI 基础
 
-Planned next steps:
+后续重点：
 
-- benchmarks and regression thresholds
-- richer real-world examples
-- 1.0 API freeze and migration guide
+- benchmark 与回归门槛
+- 更丰富的真实业务示例
+- 1.0 API 冻结与迁移说明
