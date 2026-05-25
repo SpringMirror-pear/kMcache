@@ -189,6 +189,62 @@ async def get_user(user_id: int, dependency_cache: CacheManager = Depends(get_ca
 - [kmcache/observability/metrics.py](./kmcache/observability/metrics.py)
 - [kmcache/observability/events.py](./kmcache/observability/events.py)
 
+## Git 规范
+
+建议分支模型：
+
+- `main`：仅保留可发布、稳定代码
+- `develop`：日常开发集成主分支
+- `release/0.x`：当前版本线的发布整理分支
+
+建议的短期工作分支：
+
+- `feature/<scope>-<name>`
+- `fix/<scope>-<name>`
+- `docs/<name>`
+- `refactor/<scope>-<name>`
+- `test/<scope>-<name>`
+- `chore/<name>`
+- `hotfix/<name>`
+
+建议提交格式：
+
+```text
+type(scope): short summary
+```
+
+示例：
+
+```text
+feat(manager): add batch get_or_load support
+fix(redis): handle lock timeout fallback
+docs(readme): document branching strategy
+test(manager): cover stale refresh lock path
+chore(ci): add wheel smoke test
+```
+
+建议使用的提交类型：
+
+- `feat`
+- `fix`
+- `docs`
+- `refactor`
+- `test`
+- `chore`
+- `perf`
+- `ci`
+- `build`
+- `revert`
+
+当前仓库建议规则：
+
+- 常规功能开发从 `develop` 拉分支
+- 仅紧急修复允许从 `main` 拉 `hotfix/*`
+- 一次提交只做一类逻辑变更
+- 合并到 `develop` 或 `main` 时走 Pull Request
+- 功能分支默认优先使用 squash merge
+- 不要提交 `dist/`、`__pycache__/` 等生成产物
+
 ## 质量检查
 
 运行完整本地校验流程：
@@ -213,9 +269,6 @@ CI 配置见 [\.github/workflows/ci.yml](./.github/workflows/ci.yml)。
 - [CHANGELOG.zh-CN.md](./CHANGELOG.zh-CN.md)
 - [docs/compatibility.md](./docs/compatibility.md)
 - [docs/release_checklist.md](./docs/release_checklist.md)
-- [docs/技术方案以及架构.md](./docs/技术方案以及架构.md)
-- [docs/开发约束.md](./docs/开发约束.md)
-- [docs/任务规划.md](./docs/任务规划.md)
 
 ## 当前状态
 

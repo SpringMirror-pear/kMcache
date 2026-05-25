@@ -189,6 +189,62 @@ Related modules:
 - [kmcache/observability/metrics.py](./kmcache/observability/metrics.py)
 - [kmcache/observability/events.py](./kmcache/observability/events.py)
 
+## Git Workflow
+
+Recommended branch model:
+
+- `main`: production-ready code only
+- `develop`: default integration branch for ongoing work
+- `release/0.x`: release hardening branch for the current major/minor line
+
+Recommended short-lived working branches:
+
+- `feature/<scope>-<name>`
+- `fix/<scope>-<name>`
+- `docs/<name>`
+- `refactor/<scope>-<name>`
+- `test/<scope>-<name>`
+- `chore/<name>`
+- `hotfix/<name>`
+
+Recommended commit format:
+
+```text
+type(scope): short summary
+```
+
+Examples:
+
+```text
+feat(manager): add batch get_or_load support
+fix(redis): handle lock timeout fallback
+docs(readme): document branching strategy
+test(manager): cover stale refresh lock path
+chore(ci): add wheel smoke test
+```
+
+Recommended commit types:
+
+- `feat`
+- `fix`
+- `docs`
+- `refactor`
+- `test`
+- `chore`
+- `perf`
+- `ci`
+- `build`
+- `revert`
+
+Rules for this repository:
+
+- branch from `develop` for normal feature work
+- branch from `main` only for urgent `hotfix/*`
+- keep one logical change per commit
+- use pull requests to merge into `develop` or `main`
+- prefer squash merge for feature branches unless history must be preserved
+- do not push generated artifacts such as `dist/` or `__pycache__/`
+
 ## Quality
 
 Run the full local verification workflow:
@@ -213,9 +269,6 @@ CI is defined in [\.github/workflows/ci.yml](./.github/workflows/ci.yml).
 - [CHANGELOG.zh-CN.md](./CHANGELOG.zh-CN.md)
 - [docs/compatibility.md](./docs/compatibility.md)
 - [docs/release_checklist.md](./docs/release_checklist.md)
-- [docs/技术方案以及架构.md](./docs/技术方案以及架构.md)
-- [docs/开发约束.md](./docs/开发约束.md)
-- [docs/任务规划.md](./docs/任务规划.md)
 
 ## Status
 
