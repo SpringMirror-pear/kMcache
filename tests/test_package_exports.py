@@ -20,7 +20,7 @@ class PackageExportTests(unittest.TestCase):
         """
 
         module = importlib.import_module("kmcache")
-        self.assertEqual(module.__version__, "0.3.0")
+        self.assertEqual(module.__version__, "0.4.0")
         self.assertTrue(hasattr(module, "CacheManager"))
         self.assertTrue(hasattr(module, "CacheConfig"))
         self.assertTrue(hasattr(module, "cached"))

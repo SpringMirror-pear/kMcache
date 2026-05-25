@@ -4,6 +4,19 @@ English | [简体中文](./CHANGELOG.zh-CN.md)
 
 All notable changes to this project will be documented in this file.
 
+## 0.4.0 - 2026-05-25
+
+### Added
+
+- Explicit cache envelope version migration support shared across serializers.
+- Refresh lifecycle events: `refresh_start`, `refresh_success`, and `refresh_error`.
+- Broadcast and circuit-open event hook emissions for external observability integrations.
+
+### Changed
+
+- `CacheEnvelope.version` now defaults to the current schema version and legacy payloads are migrated on read.
+- Background refresh now applies `refresh_timeout` as its effective loader timeout when provided.
+
 ## 0.3.0 - 2026-05-25
 
 ### Added

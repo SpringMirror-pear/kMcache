@@ -8,6 +8,7 @@ from unittest.mock import patch
 from kmcache.compression.gzip import GzipCompressor
 from kmcache.exceptions import SerializationError
 from kmcache.models import CacheEnvelope
+from kmcache.models import CURRENT_CACHE_ENVELOPE_VERSION
 from kmcache.serialization.compressed import CompressedSerializer
 from kmcache.serialization.json import JsonSerializer
 from kmcache.serialization.msgpack import MessagePackSerializer
@@ -122,6 +123,46 @@ class JsonSerializerTests(unittest.TestCase):
         with self.assertRaises(SerializationError):
             serializer.dumps(envelope)
 
+    def test_json_serializer_migrates_legacy_payload_to_current_version(self) -> None:
+        """验证旧版本载荷在读取时会迁移到当前版本。"""
+
+        serializer = JsonSerializer()
+        payload = (
+            '{"value":"demo","created_at":100.0,"soft_expire_at":120.0,'
+            '"hard_expire_at":160.0,"is_null":false,"version":1}'
+        )
+
+        restored = serializer.loads(payload)
+
+        self.assertEqual(restored.value, "demo")
+        self.assertEqual(restored.version, CURRENT_CACHE_ENVELOPE_VERSION)
+
+    def test_json_serializer_treats_missing_version_as_legacy_payload(self) -> None:
+        """验证缺少 version 字段时按旧版本兼容处理。"""
+
+        serializer = JsonSerializer()
+        payload = (
+            '{"value":"demo","created_at":100.0,"soft_expire_at":120.0,'
+            '"hard_expire_at":160.0,"is_null":false}'
+        )
+
+        restored = serializer.loads(payload)
+
+        self.assertEqual(restored.value, "demo")
+        self.assertEqual(restored.version, CURRENT_CACHE_ENVELOPE_VERSION)
+
+    def test_json_serializer_rejects_future_unsupported_version(self) -> None:
+        """验证不支持的未来版本会被明确拒绝。"""
+
+        serializer = JsonSerializer()
+        payload = (
+            '{"value":"demo","created_at":100.0,"soft_expire_at":120.0,'
+            '"hard_expire_at":160.0,"is_null":false,"version":999}'
+        )
+
+        with self.assertRaises(SerializationError):
+            serializer.loads(payload)
+
     def test_compressed_serializer_round_trip_preserves_payload(self) -> None:
         """验证压缩序列化器可以完成闭环。"""
 
@@ -169,6 +210,42 @@ class JsonSerializerTests(unittest.TestCase):
 
         self.assertEqual(restored.value, envelope.value)
         self.assertEqual(restored.created_at, envelope.created_at)
+
+    def test_msgpack_serializer_migrates_legacy_payload_to_current_version(self) -> None:
+        """验证 MessagePack 载荷也会复用版本迁移策略。"""
+
+        class FakeMsgpackModule:
+            @staticmethod
+            def packb(value, use_bin_type=True):  # noqa: ARG004
+                import json
+
+                return json.dumps(value).encode("utf-8")
+
+            @staticmethod
+            def unpackb(payload, raw=False):  # noqa: ARG004
+                import json
+
+                return json.loads(payload.decode("utf-8"))
+
+        serializer = MessagePackSerializer()
+
+        with patch("importlib.import_module", return_value=FakeMsgpackModule()):
+            legacy = FakeMsgpackModule.packb(
+                {
+                    "value": "demo",
+                    "created_at": 1.0,
+                    "soft_expire_at": 2.0,
+                    "hard_expire_at": 3.0,
+                    "is_null": False,
+                    "version": 1,
+                }
+            )
+            import base64
+
+            restored = serializer.loads(base64.b64encode(legacy).decode("ascii"))
+
+        self.assertEqual(restored.value, "demo")
+        self.assertEqual(restored.version, CURRENT_CACHE_ENVELOPE_VERSION)
 
     def test_msgpack_serializer_raises_when_dependency_is_missing(self) -> None:
         """验证未安装可选依赖时会抛出明确异常。"""

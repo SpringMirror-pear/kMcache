@@ -758,6 +758,7 @@ class CacheManager:
         event = CacheEvent(event=event_type, key=key, source=self._config.broadcast.instance_id)
         await self._broadcaster.publish(event)
         await self._metrics_hook.on_broadcast(key, event_type.value)
+        await self._event_hook.emit("broadcast", key=key, event_type=event_type.value)
 
     def _resolve_policy(
         self,
@@ -801,6 +802,24 @@ class CacheManager:
                 if merged.refresh_timeout is not None
                 else self._config.default_refresh_timeout
             ),
+        )
+
+    def _resolve_refresh_policy(self, policy: CachePolicy) -> CachePolicy:
+        """为后台刷新构建生效策略。"""
+
+        refresh_timeout = (
+            policy.refresh_timeout
+            if policy.refresh_timeout is not None
+            else policy.loader_timeout
+        )
+        return CachePolicy(
+            ttl=policy.ttl,
+            soft_ttl=policy.soft_ttl,
+            null_ttl=policy.null_ttl,
+            ttl_jitter=policy.ttl_jitter,
+            enable_stale=policy.enable_stale,
+            loader_timeout=refresh_timeout,
+            refresh_timeout=policy.refresh_timeout,
         )
 
     def _resolve_ttl(self, ttl: int | None, ttl_jitter: int | None = None) -> int | None:
@@ -908,18 +927,22 @@ class CacheManager:
         """
 
         started_at = perf_counter()
+        refresh_policy = self._resolve_refresh_policy(policy)
+        await self._event_hook.emit("refresh_start", key=key)
         try:
             await self._singleflight.do(
                 key,
-                lambda: self._load_and_store_with_lock(key, loader, policy=policy),
+                lambda: self._load_and_store_with_lock(key, loader, policy=refresh_policy),
             )
             await self._metrics_hook.on_background_refresh_success(
                 key,
                 perf_counter() - started_at,
             )
+            await self._event_hook.emit("refresh_success", key=key)
             await self._event_hook.emit("background_refresh_success", key=key)
         except Exception:
             await self._metrics_hook.on_background_refresh_error(key)
+            await self._event_hook.emit("refresh_error", key=key)
             await self._event_hook.emit("background_refresh_error", key=key)
 
     async def _wait_for_populated_value(
@@ -1110,6 +1133,7 @@ class CacheManager:
             circuit.allow()
         except CircuitBreakerOpenError:
             await self._metrics_hook.on_circuit_open(backend.name)
+            await self._event_hook.emit("circuit_open", backend=backend.name)
             log_cache_event(
                 self._logger,
                 logging.WARNING,

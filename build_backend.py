@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Iterable
 
 PROJECT_NAME = "kmcache"
-VERSION = "0.3.0"
+VERSION = "0.4.0"
 WHEEL_TAG = "py3-none-any"
 DIST_INFO = f"{PROJECT_NAME}-{VERSION}.dist-info"
 ROOT = Path(__file__).resolve().parent

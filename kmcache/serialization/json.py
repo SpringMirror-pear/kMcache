@@ -6,6 +6,8 @@ import json
 
 from kmcache.exceptions import SerializationError
 from kmcache.models import CacheEnvelope
+from kmcache.serialization.base import dump_envelope_payload
+from kmcache.serialization.base import load_envelope_payload
 
 
 class JsonSerializer:
@@ -21,14 +23,7 @@ class JsonSerializer:
             str: 序列化后的 JSON 字符串。
         """
 
-        payload = {
-            "value": value.value,
-            "created_at": value.created_at,
-            "soft_expire_at": value.soft_expire_at,
-            "hard_expire_at": value.hard_expire_at,
-            "is_null": value.is_null,
-            "version": value.version,
-        }
+        payload = dump_envelope_payload(value)
         try:
             return json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
         except Exception as exc:
@@ -49,14 +44,4 @@ class JsonSerializer:
         except Exception as exc:
             raise SerializationError("json deserialization failed") from exc
 
-        try:
-            return CacheEnvelope(
-                value=raw.get("value"),
-                created_at=raw["created_at"],
-                soft_expire_at=raw.get("soft_expire_at"),
-                hard_expire_at=raw.get("hard_expire_at"),
-                is_null=raw.get("is_null", False),
-                version=raw.get("version", 1),
-            )
-        except (KeyError, TypeError) as exc:
-            raise SerializationError("json payload structure is invalid") from exc
+        return load_envelope_payload(raw)

@@ -7,6 +7,9 @@ from typing import Any, Awaitable, Callable
 
 from kmcache.utils.time import utc_timestamp
 
+CURRENT_CACHE_ENVELOPE_VERSION = 2
+LEGACY_CACHE_ENVELOPE_VERSION = 1
+
 Loader = Callable[[], Awaitable[Any] | Any]
 LoaderFallback = Callable[[Exception], Awaitable[Any] | Any] | Any
 
@@ -20,7 +23,7 @@ class CacheEnvelope:
     soft_expire_at: float | None
     hard_expire_at: float | None
     is_null: bool = False
-    version: int = 1
+    version: int = CURRENT_CACHE_ENVELOPE_VERSION
 
     def is_soft_expired(self, now: float | None = None) -> bool:
         """判断是否达到软过期时间。

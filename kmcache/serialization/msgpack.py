@@ -9,6 +9,8 @@ from typing import Any
 from kmcache.exceptions import SerializationError
 from kmcache.models import CacheEnvelope
 from kmcache.serialization.base import BaseSerializer
+from kmcache.serialization.base import dump_envelope_payload
+from kmcache.serialization.base import load_envelope_payload
 
 
 class MessagePackSerializer(BaseSerializer):
@@ -17,14 +19,7 @@ class MessagePackSerializer(BaseSerializer):
     def dumps(self, value: CacheEnvelope) -> str:
         """将缓存包装对象序列化为 MessagePack 字符串。"""
 
-        payload = {
-            "value": value.value,
-            "created_at": value.created_at,
-            "soft_expire_at": value.soft_expire_at,
-            "hard_expire_at": value.hard_expire_at,
-            "is_null": value.is_null,
-            "version": value.version,
-        }
+        payload = dump_envelope_payload(value)
         try:
             encoded = self._msgpack().packb(payload, use_bin_type=True)
             return base64.b64encode(encoded).decode("ascii")
@@ -44,17 +39,7 @@ class MessagePackSerializer(BaseSerializer):
         except Exception as exc:
             raise SerializationError("msgpack deserialization failed") from exc
 
-        try:
-            return CacheEnvelope(
-                value=raw.get("value"),
-                created_at=raw["created_at"],
-                soft_expire_at=raw.get("soft_expire_at"),
-                hard_expire_at=raw.get("hard_expire_at"),
-                is_null=raw.get("is_null", False),
-                version=raw.get("version", 1),
-            )
-        except (KeyError, TypeError) as exc:
-            raise SerializationError("msgpack payload structure is invalid") from exc
+        return load_envelope_payload(raw)
 
     def _msgpack(self) -> Any:
         """按需加载 msgpack 依赖。"""

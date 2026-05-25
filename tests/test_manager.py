@@ -491,7 +491,75 @@ class CacheManagerTests(unittest.IsolatedAsyncioTestCase):
         self.assertGreaterEqual(snapshot["cache_hit_total"], 2)
         self.assertGreaterEqual(snapshot["cache_loader_outcome_success_total"], 1)
         self.assertTrue(any(event["event"] == "set" for event in events.events))
+        self.assertTrue(any(event["event"] == "broadcast" for event in events.events))
         self.assertTrue(any(event["event"] == "loader_success" for event in events.events))
+
+    async def test_cache_manager_uses_refresh_timeout_for_background_refresh(self) -> None:
+        """验证后台刷新会优先使用 refresh_timeout。"""
+
+        backend = LocalCacheBackend()
+        events = InMemoryEventHook()
+        cache = CacheManager(
+            [backend],
+            CacheConfig(ttl_jitter=0, enable_stale=True, default_loader_timeout=1.0),
+            event_hook=events,
+        )
+        now = utc_timestamp()
+        stale_envelope = CacheEnvelope(
+            value="old",
+            created_at=now - 20,
+            soft_expire_at=now - 1,
+            hard_expire_at=now + 30,
+        )
+        await backend.set("default:profile:refresh-timeout", stale_envelope)
+
+        async def slow_loader() -> str:
+            await asyncio.sleep(0.05)
+            return "new"
+
+        value = await cache.get_or_load(
+            "profile:refresh-timeout",
+            slow_loader,
+            policy=CachePolicy(
+                ttl=60,
+                soft_ttl=10,
+                loader_timeout=1.0,
+                refresh_timeout=0.01,
+            ),
+        )
+        await asyncio.sleep(0.1)
+        refreshed = await cache.get("profile:refresh-timeout")
+
+        event_names = [event["event"] for event in events.events]
+        self.assertEqual(value, "old")
+        self.assertEqual(refreshed, "old")
+        self.assertIn("refresh_start", event_names)
+        self.assertIn("refresh_error", event_names)
+
+    async def test_cache_manager_emits_circuit_open_event(self) -> None:
+        """验证熔断打开时会发出事件。"""
+
+        events = InMemoryEventHook()
+        cache = CacheManager(
+            [FailingBackend(), LocalCacheBackend()],
+            CacheConfig(
+                ttl_jitter=0,
+                circuit_breaker=CircuitBreakerConfig(
+                    enabled=True,
+                    failure_threshold=1,
+                    recovery_timeout=60.0,
+                    half_open_max_calls=1,
+                ),
+            ),
+            event_hook=events,
+        )
+
+        await cache.get("missing")
+        await cache.get("missing")
+
+        self.assertTrue(
+            any(event["event"] == "circuit_open" for event in events.events),
+        )
 
     async def test_cache_manager_health_snapshot_reports_backend_state(self) -> None:
         """验证健康快照会包含后端状态。"""

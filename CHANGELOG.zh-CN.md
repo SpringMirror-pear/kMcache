@@ -4,6 +4,19 @@
 
 本文件记录项目中的重要变更。
 
+## 0.4.0 - 2026-05-25
+
+### 新增
+
+- 为序列化层增加统一的 `CacheEnvelope` 版本迁移策略。
+- 新增刷新生命周期事件：`refresh_start`、`refresh_success`、`refresh_error`。
+- 新增 `broadcast` 与 `circuit_open` 事件钩子发射，便于外接观测系统。
+
+### 变更
+
+- `CacheEnvelope.version` 默认提升为当前 schema 版本，读取旧载荷时会自动迁移。
+- 后台刷新在配置 `refresh_timeout` 时会优先使用该超时时间。
+
 ## 0.3.0 - 2026-05-25
 
 ### 新增
