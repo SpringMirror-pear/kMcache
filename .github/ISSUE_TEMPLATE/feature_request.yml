@@ -1,0 +1,30 @@
+name: Feature request
+description: Suggest an improvement or new capability for kmcache
+title: "[Feature] "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What limitation or pain point are you trying to solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: Describe the API, behavior, or workflow you want
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Existing workarounds or alternative designs
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope and impact
+      description: Who benefits, and what parts of the library would change?

@@ -267,10 +267,12 @@ CI is defined in [\.github/workflows/ci.yml](./.github/workflows/ci.yml).
 - [README.zh-CN.md](./README.zh-CN.md)
 - [CHANGELOG.md](./CHANGELOG.md)
 - [CHANGELOG.zh-CN.md](./CHANGELOG.zh-CN.md)
+- [CONTRIBUTING.md](./CONTRIBUTING.md)
+- [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md)
 - [docs/compatibility.md](./docs/compatibility.md)
 - [docs/release_checklist.md](./docs/release_checklist.md)
 
-## Status
+## Roadmap
 
 Current strengths:
 
@@ -279,7 +281,7 @@ Current strengths:
 - solid unit and integration test baseline
 - packaging, changelog, and CI foundations for open-source usage
 
-Planned next steps:
+Next steps:
 
 - benchmarks and regression thresholds
 - richer real-world examples

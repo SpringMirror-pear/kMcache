@@ -267,10 +267,12 @@ CI 配置见 [\.github/workflows/ci.yml](./.github/workflows/ci.yml)。
 - [README.md](./README.md)
 - [CHANGELOG.md](./CHANGELOG.md)
 - [CHANGELOG.zh-CN.md](./CHANGELOG.zh-CN.md)
+- [CONTRIBUTING.md](./CONTRIBUTING.md)
+- [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md)
 - [docs/compatibility.md](./docs/compatibility.md)
 - [docs/release_checklist.md](./docs/release_checklist.md)
 
-## 当前状态
+## 后续方向
 
 当前优势：
 
