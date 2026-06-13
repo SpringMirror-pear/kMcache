@@ -20,11 +20,31 @@ class PackageExportTests(unittest.TestCase):
         """
 
         module = importlib.import_module("kmcache")
-        self.assertEqual(module.__version__, "0.4.0")
+        self.assertEqual(module.__version__, "1.0.0")
         self.assertTrue(hasattr(module, "CacheManager"))
         self.assertTrue(hasattr(module, "CacheConfig"))
         self.assertTrue(hasattr(module, "cached"))
         self.assertTrue(hasattr(module, "create_cache_lifespan"))
+        self.assertEqual(
+            set(module.__all__),
+            {
+                "__version__",
+                "CacheConfig",
+                "CacheManager",
+                "CachePolicy",
+                "LocalCacheBackend",
+                "RedisCacheBackend",
+                "build_cache_config_from_env",
+                "build_cache_config_from_settings",
+                "build_cache_key",
+                "cached",
+                "create_cache_health_route",
+                "create_cache_lifespan",
+                "create_cache_lifespan_with_warmup",
+                "get_cache",
+                "prefix_key_builder",
+            },
+        )
 
     def test_backends_module_lazy_loads_redis_backend(self) -> None:
         """验证后端模块会延迟加载 Redis 后端。

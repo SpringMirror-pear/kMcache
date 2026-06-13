@@ -1,29 +1,36 @@
-# 兼容性说明
+# Compatibility
 
-## 支持矩阵
+## Support Matrix
 
 - Python: `3.11+`
 - FastAPI: `0.136.1`
 - Redis client: `redis==7.4.0`
 - MessagePack serializer: `msgpack==1.1.2`，仅在安装 `kmcache[msgpack]` 后可用
+- Compression helper: built-in `GzipCompressor`
 
-## 公共 API 承诺
+## Public API Freeze for 1.x
 
-以下接口视为当前稳定公共 API：
+The following interfaces are part of the stable public API for `1.x`:
 
 - `CacheManager`
 - `CacheConfig`
 - `CachePolicy`
 - `LocalCacheBackend`
 - `RedisCacheBackend`
+- `build_cache_config_from_env`
+- `build_cache_config_from_settings`
+- `build_cache_key`
 - `cached`
 - `create_cache_lifespan`
+- `create_cache_lifespan_with_warmup`
 - `create_cache_health_route`
 - `get_cache`
+- `prefix_key_builder`
 
-## 兼容策略
+## Compatibility Policy
 
-- `0.x` 期间尽量保持向后兼容，但允许在小范围内调整实验性扩展接口
-- 现有 `get_or_load(ttl=..., soft_ttl=...)` 形式继续支持
-- 新增 `policy=` 形式与旧参数并存，当前版本无移除计划
-- 可选依赖未安装时，相关模块按需失败并给出明确异常，而不是在顶层导入时失败
+- `1.x` will not casually change the core `CacheManager` method signatures.
+- The existing `get_or_load(ttl=..., soft_ttl=...)` keyword style remains supported in `1.0.0`.
+- `policy=` is the recommended shape for new code, but not the only supported shape.
+- Optional dependencies continue to fail lazily with clear errors rather than breaking top-level import.
+- Serializer payload migration is supported for legacy cache envelope version `1`.

@@ -2,7 +2,7 @@
 
 [English](./README.md) | 简体中文
 
-`kmcache` 是一个面向 FastAPI 服务场景的异步缓存工具库，目标是在保持接入简单的同时，提供足够生产可用的缓存编排能力。它内置 L1/L2 分层缓存、热点保护、失效广播、预热、观测钩子和框架集成辅助，避免你在每个项目里重复实现同类逻辑。
+`kmcache` 是一个面向 FastAPI 服务场景的异步缓存工具库。`1.0.0` 版本开始冻结文档中定义的公共 API，重点提供稳定的 L1/L2 分层缓存、可预测的框架集成方式，以及面向生产环境的缓存协同能力。
 
 ## 核心能力
 
@@ -150,10 +150,13 @@ async def get_user(user_id: int, dependency_cache: CacheManager = Depends(get_ca
 当前提供的辅助能力：
 
 - `create_cache_lifespan`
+- `create_cache_lifespan_with_warmup`
 - `get_cache`
 - `create_cache_health_route`
 - `cached`
+- `build_cache_key`
 - `prefix_key_builder`
+- `build_cache_config_from_env`
 - `build_cache_config_from_settings`
 
 可运行示例见 [examples/fastapi_minimal.py](./examples/fastapi_minimal.py)。
@@ -167,8 +170,12 @@ async def get_user(user_id: int, dependency_cache: CacheManager = Depends(get_ca
 - `CachePolicy`
 - `LocalCacheBackend`
 - `RedisCacheBackend`
+- `build_cache_config_from_env`
+- `build_cache_config_from_settings`
+- `build_cache_key`
 - `cached`
 - `create_cache_lifespan`
+- `create_cache_lifespan_with_warmup`
 - `create_cache_health_route`
 - `get_cache`
 - `prefix_key_builder`
@@ -260,6 +267,12 @@ python scripts/check.py
 - wheel 构建 smoke test
 - 依赖存在性检查
 
+基准回归检查：
+
+```bash
+python scripts/benchmark.py
+```
+
 CI 配置见 [\.github/workflows/ci.yml](./.github/workflows/ci.yml)。
 
 ## 文档
@@ -270,7 +283,11 @@ CI 配置见 [\.github/workflows/ci.yml](./.github/workflows/ci.yml)。
 - [CONTRIBUTING.md](./CONTRIBUTING.md)
 - [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md)
 - [docs/compatibility.md](./docs/compatibility.md)
+- [docs/integration_guide.md](./docs/integration_guide.md)
+- [docs/integration_guide.zh-CN.md](./docs/integration_guide.zh-CN.md)
+- [docs/migration_guide.md](./docs/migration_guide.md)
 - [docs/release_checklist.md](./docs/release_checklist.md)
+- [docs/release_standards.md](./docs/release_standards.md)
 
 ## 后续方向
 
@@ -283,6 +300,6 @@ CI 配置见 [\.github/workflows/ci.yml](./.github/workflows/ci.yml)。
 
 后续重点：
 
-- benchmark 与回归门槛
 - 更丰富的真实业务示例
-- 1.0 API 冻结与迁移说明
+- 更多观测系统集成
+- 围绕 `1.x` 冻结 API 之后的未来大版本规划

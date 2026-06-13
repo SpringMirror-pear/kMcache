@@ -21,7 +21,7 @@ class PackagingMetadataTests(unittest.TestCase):
         pyproject = tomllib.loads((root / "pyproject.toml").read_text(encoding="utf-8"))
         project = pyproject["project"]
 
-        self.assertEqual(project["version"], "0.4.0")
+        self.assertEqual(project["version"], "1.0.0")
         self.assertEqual(project["requires-python"], ">=3.11")
         self.assertEqual(project["dependencies"], [])
         self.assertIn("redis", project["optional-dependencies"])
@@ -36,7 +36,7 @@ class PackagingMetadataTests(unittest.TestCase):
             wheel_path = Path(tmpdir) / wheel_name
 
             with zipfile.ZipFile(wheel_path) as archive:
-                metadata_name = "kmcache-0.4.0.dist-info/METADATA"
+                metadata_name = "kmcache-1.0.0.dist-info/METADATA"
                 metadata = archive.read(metadata_name).decode("utf-8")
 
         self.assertIn("Requires-Python: >=3.11", metadata)

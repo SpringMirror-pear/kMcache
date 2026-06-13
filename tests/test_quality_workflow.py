@@ -22,4 +22,5 @@ class QualityWorkflowTests(unittest.TestCase):
         root = Path(__file__).resolve().parent.parent
         self.assertTrue((root / "scripts" / "check.py").exists())
         self.assertTrue((root / "scripts" / "check.ps1").exists())
+        self.assertTrue((root / "scripts" / "benchmark.py").exists())
         self.assertTrue((root / ".github" / "workflows" / "ci.yml").exists())

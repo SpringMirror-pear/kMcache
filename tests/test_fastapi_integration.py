@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import unittest
+from unittest.mock import patch
 from types import SimpleNamespace
 from typing import Any
 
@@ -13,12 +14,14 @@ from kmcache.backends.local import LocalCacheBackend
 from kmcache.config import CacheConfig, WarmupConfig
 from kmcache.integrations.decorators import cached
 from kmcache.integrations.fastapi import (
+    build_cache_config_from_env,
     build_cache_config_from_settings,
     create_cache_health_route,
     create_cache_lifespan,
+    create_cache_lifespan_with_warmup,
     get_cache,
 )
-from kmcache.integrations.keys import prefix_key_builder
+from kmcache.integrations.keys import build_cache_key, prefix_key_builder
 from kmcache.manager import CacheManager
 from kmcache.models import WarmupItem
 
@@ -252,6 +255,24 @@ class FastAPIIntegrationTests(unittest.TestCase):
         self.assertEqual(config.namespace, "service-fastapi")
         self.assertFalse(config.redis.enabled)
 
+    def test_build_cache_config_from_env_uses_environment_mapping(self) -> None:
+        """验证 FastAPI 集成辅助可以从环境变量构建配置。"""
+
+        with patch.dict(
+            "os.environ",
+            {
+                "KMCACHE_NAMESPACE": "service-env",
+                "KMCACHE_REDIS_ENABLED": "false",
+                "KMCACHE_DEFAULT_TTL": "90",
+            },
+            clear=False,
+        ):
+            config = build_cache_config_from_env()
+
+        self.assertEqual(config.namespace, "service-env")
+        self.assertFalse(config.redis.enabled)
+        self.assertEqual(config.default_ttl, 90)
+
     def test_prefix_key_builder_builds_stable_keys(self) -> None:
         """验证统一 key builder 可以生成稳定 Key。"""
 
@@ -259,3 +280,39 @@ class FastAPIIntegrationTests(unittest.TestCase):
         key = builder(1, status="active")
 
         self.assertEqual(key, "users:1:status=active")
+
+    def test_build_cache_key_builds_stable_keys(self) -> None:
+        """验证通用 key builder 会稳定排序命名参数。"""
+
+        key = build_cache_key("users", 1, status="active", region="cn")
+
+        self.assertEqual(key, "users:1:region=cn:status=active")
+
+    def test_create_cache_lifespan_with_warmup_runs_explicit_items(self) -> None:
+        """验证显式 warmup items 会在应用启动时执行。"""
+
+        cache = TrackingCacheManager([LocalCacheBackend()], CacheConfig(ttl_jitter=0))
+        app = FastAPI(
+            lifespan=create_cache_lifespan_with_warmup(
+                cache,
+                warmup_items=[
+                    WarmupItem(
+                        key="warmup:item",
+                        loader=lambda: "ready",
+                        ttl=60,
+                    )
+                ],
+            )
+        )
+
+        @app.get("/warmup")
+        async def warmup_endpoint(
+            dependency_cache: CacheManager = Depends(get_cache),
+        ) -> dict[str, str | None]:
+            return {"value": await dependency_cache.get("warmup:item")}
+
+        with TestClient(app) as client:
+            response = client.get("/warmup")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {"value": "ready"})

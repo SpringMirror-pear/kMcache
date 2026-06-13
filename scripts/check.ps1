@@ -43,6 +43,9 @@ if (-not $CompileOnly -and -not $TestsOnly) {
     Invoke-Step "Package Smoke" {
         python -c "import tempfile; from pathlib import Path; import build_backend; tmp = tempfile.TemporaryDirectory(); wheel_name = build_backend.build_wheel(tmp.name); wheel_path = Path(tmp.name) / wheel_name; assert wheel_path.exists(), wheel_path"
     }
+    Invoke-Step "Benchmarks" {
+        python scripts/benchmark.py
+    }
     Invoke-Step "Package Metadata" {
         python -m pip show fastapi > $null
         python -m pip show redis > $null

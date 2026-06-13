@@ -10,6 +10,7 @@ from fastapi.responses import JSONResponse
 
 from kmcache.config import CacheConfig
 from kmcache.manager import CacheManager
+from kmcache.models import WarmupItem
 
 
 def create_cache_lifespan(cache: CacheManager):
@@ -22,19 +23,23 @@ def create_cache_lifespan(cache: CacheManager):
         callable: 可直接传给 FastAPI 的 lifespan 函数。
     """
 
+    return create_cache_lifespan_with_warmup(cache)
+
+
+def create_cache_lifespan_with_warmup(
+    cache: CacheManager,
+    warmup_items: list[WarmupItem] | None = None,
+):
+    """创建带启动预热的 FastAPI 生命周期上下文管理器。"""
+
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-        """在应用生命周期内管理缓存管理器。
-
-        参数:
-            app: FastAPI 应用实例。
-
-        返回:
-            AsyncIterator[None]: 生命周期上下文。
-        """
+        """在应用生命周期内管理缓存管理器。"""
 
         app.state.cache = cache
         await cache.start()
+        if warmup_items:
+            await cache.warmup(warmup_items)
         yield
         await cache.close()
 
@@ -69,3 +74,9 @@ def build_cache_config_from_settings(settings: object) -> CacheConfig:
     """从 settings 对象构建缓存配置。"""
 
     return CacheConfig.from_object(settings)
+
+
+def build_cache_config_from_env(*, prefix: str = "KMCACHE_") -> CacheConfig:
+    """从环境变量构建缓存配置。"""
+
+    return CacheConfig.from_env(prefix=prefix)

@@ -15,6 +15,7 @@ from kmcache.models import CacheEnvelope
 from kmcache.serialization.base import BaseSerializer
 from kmcache.serialization.json import JsonSerializer
 from kmcache.utils.keys import join_key_parts
+from kmcache.utils.time import utc_timestamp
 
 
 class RedisCacheBackend(BaseCacheBackend):
@@ -194,7 +195,15 @@ class RedisCacheBackend(BaseCacheBackend):
         """
 
         try:
-            await self._client.expire(self._build_key(key), ttl)
+            redis_key = self._build_key(key)
+            payload = await self._client.get(redis_key)
+            if payload is None:
+                return
+            envelope = self._serializer.loads(payload)
+            now = utc_timestamp()
+            envelope.hard_expire_at = now + ttl
+            serialized = self._serializer.dumps(envelope)
+            await self._client.set(redis_key, serialized, ex=ttl)
         except Exception as exc:
             raise BackendError(f"redis expire failed for key={key!r}") from exc
 

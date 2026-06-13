@@ -5,9 +5,11 @@
 - 更新 `kmcache/__init__.py`、`pyproject.toml`、`build_backend.py` 中的版本号
 - 更新 [CHANGELOG.md](/c:/Users/Administrator/Desktop/project/python/kmcache/CHANGELOG.md)
 - 运行 `python scripts/check.py`
+- 运行 `python scripts/benchmark.py`
 - 确认 `python -m unittest` 全绿
 - 确认 Redis 集成测试已在本地可用环境执行
 - 检查 README 与示例代码是否仍与当前公共 API 一致
+- 检查 [docs/migration_guide.md](/c:/Users/Administrator/Desktop/project/python/kmcache/docs/migration_guide.md) 与 [docs/release_standards.md](/c:/Users/Administrator/Desktop/project/python/kmcache/docs/release_standards.md) 是否仍然准确
 
 ## 构建物检查
 

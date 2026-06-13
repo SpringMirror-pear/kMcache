@@ -73,6 +73,10 @@ def main() -> int:
         ],
     )
     run_step(
+        "Benchmarks",
+        [sys.executable, "scripts/benchmark.py"],
+    )
+    run_step(
         "Dependency Check",
         [sys.executable, "-m", "pip", "show", "fastapi"],
     )

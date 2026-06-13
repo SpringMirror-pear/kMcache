@@ -2,7 +2,7 @@
 
 English | [简体中文](./README.zh-CN.md)
 
-`kmcache` is an async caching toolkit built for FastAPI-oriented services. It provides a composable L1/L2 cache architecture, production-focused cache protection features, and framework integration helpers so you can add caching without rewriting the same coordination logic in every project.
+`kmcache` is an async caching toolkit built for FastAPI-oriented services. Version `1.0.0` freezes the documented public API and focuses on stable layered caching, predictable framework integration, and production-oriented cache coordination.
 
 ## Highlights
 
@@ -150,10 +150,13 @@ async def get_user(user_id: int, dependency_cache: CacheManager = Depends(get_ca
 Helpers included:
 
 - `create_cache_lifespan`
+- `create_cache_lifespan_with_warmup`
 - `get_cache`
 - `create_cache_health_route`
 - `cached`
+- `build_cache_key`
 - `prefix_key_builder`
+- `build_cache_config_from_env`
 - `build_cache_config_from_settings`
 
 See [examples/fastapi_minimal.py](./examples/fastapi_minimal.py) for a runnable example.
@@ -167,8 +170,12 @@ Stable top-level exports currently include:
 - `CachePolicy`
 - `LocalCacheBackend`
 - `RedisCacheBackend`
+- `build_cache_config_from_env`
+- `build_cache_config_from_settings`
+- `build_cache_key`
 - `cached`
 - `create_cache_lifespan`
+- `create_cache_lifespan_with_warmup`
 - `create_cache_health_route`
 - `get_cache`
 - `prefix_key_builder`
@@ -260,6 +267,12 @@ This currently covers:
 - wheel smoke test
 - dependency presence checks
 
+Benchmark regression checks:
+
+```bash
+python scripts/benchmark.py
+```
+
 CI is defined in [\.github/workflows/ci.yml](./.github/workflows/ci.yml).
 
 ## Documentation
@@ -270,7 +283,11 @@ CI is defined in [\.github/workflows/ci.yml](./.github/workflows/ci.yml).
 - [CONTRIBUTING.md](./CONTRIBUTING.md)
 - [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md)
 - [docs/compatibility.md](./docs/compatibility.md)
+- [docs/integration_guide.md](./docs/integration_guide.md)
+- [docs/integration_guide.zh-CN.md](./docs/integration_guide.zh-CN.md)
+- [docs/migration_guide.md](./docs/migration_guide.md)
 - [docs/release_checklist.md](./docs/release_checklist.md)
+- [docs/release_standards.md](./docs/release_standards.md)
 
 ## Roadmap
 
@@ -283,6 +300,6 @@ Current strengths:
 
 Next steps:
 
-- benchmarks and regression thresholds
 - richer real-world examples
-- 1.0 API freeze and migration guide
+- additional observability integrations
+- future major-version planning beyond the frozen `1.x` API line

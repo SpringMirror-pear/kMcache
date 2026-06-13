@@ -2,19 +2,22 @@
 
 from __future__ import annotations
 
-__version__ = "0.4.0"
+__version__ = "1.0.0"
 
 __all__ = [
     "__version__",
     "CacheConfig",
     "CacheManager",
     "CachePolicy",
+    "build_cache_config_from_env",
+    "build_cache_config_from_settings",
+    "build_cache_key",
     "LocalCacheBackend",
     "RedisCacheBackend",
-    "build_cache_config_from_settings",
     "cached",
     "create_cache_health_route",
     "create_cache_lifespan",
+    "create_cache_lifespan_with_warmup",
     "get_cache",
     "prefix_key_builder",
 ]
@@ -63,9 +66,21 @@ def __getattr__(name: str):
         from kmcache.integrations.fastapi import build_cache_config_from_settings
 
         return build_cache_config_from_settings
+    if name == "build_cache_config_from_env":
+        from kmcache.integrations.fastapi import build_cache_config_from_env
+
+        return build_cache_config_from_env
+    if name == "build_cache_key":
+        from kmcache.integrations.keys import build_cache_key
+
+        return build_cache_key
     if name == "prefix_key_builder":
         from kmcache.integrations.keys import prefix_key_builder
 
         return prefix_key_builder
+    if name == "create_cache_lifespan_with_warmup":
+        from kmcache.integrations.fastapi import create_cache_lifespan_with_warmup
+
+        return create_cache_lifespan_with_warmup
     msg = f"module {__name__!r} has no attribute {name!r}"
     raise AttributeError(msg)

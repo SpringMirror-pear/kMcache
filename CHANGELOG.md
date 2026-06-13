@@ -4,6 +4,32 @@ English | [简体中文](./CHANGELOG.zh-CN.md)
 
 All notable changes to this project will be documented in this file.
 
+## 1.0.0 - 2026-06-14
+
+### Added
+
+- Stable release documentation for API freeze, migration guidance, and release standards.
+- Benchmark runner with regression thresholds for L1 hit, L2 hit, miss-load, stale return, and dual-instance lock contention.
+
+### Changed
+
+- Froze the documented public API for the `1.x` line.
+- Expanded compatibility documentation with the supported matrix and `1.x` stability policy.
+
+## 0.5.0 - 2026-06-13
+
+### Added
+
+- FastAPI integration helpers for environment-based config construction.
+- `create_cache_lifespan_with_warmup` for explicit startup warmup wiring.
+- `build_cache_key` as a general stable key builder helper.
+- A richer FastAPI patterns example covering user detail, list pagination, null caching, hot keys, and SWR.
+- Dedicated integration guides for recommended single-instance, local dev, L1+L2, production Redis, broadcast, and metrics usage.
+
+### Changed
+
+- Expanded README documentation to better reflect the FastAPI-first integration path and helper surface.
+
 ## 0.4.0 - 2026-05-25
 
 ### Added
